@@ -1,5 +1,3 @@
-"""Unit tests for the battery optimizer and API endpoints."""
-
 import pytest
 from fastapi.testclient import TestClient
 
@@ -10,9 +8,6 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from optimizer import run_optimization
 from main import app
 
-# ---------------------------------------------------------------------------
-# Fixtures
-# ---------------------------------------------------------------------------
 HEADERS = {"x-api-key": "dev-key-abc123"}
 
 LOAD = [0.4, 0.3, 0.3, 0.3, 0.4, 0.6, 1.2, 1.5, 1.3, 1.0, 0.9, 0.8,
@@ -37,9 +32,6 @@ def client():
     return TestClient(app)
 
 
-# ---------------------------------------------------------------------------
-# Optimizer unit tests
-# ---------------------------------------------------------------------------
 class TestOptimizer:
     def test_returns_correct_structure(self):
         result = run_optimization(LOAD, PRICE, **BATTERY)
@@ -98,9 +90,6 @@ class TestOptimizer:
         assert len(result["explanation"]) > 20
 
 
-# ---------------------------------------------------------------------------
-# API endpoint tests
-# ---------------------------------------------------------------------------
 class TestHealthEndpoint:
     def test_health_ok(self, client):
         resp = client.get("/health")

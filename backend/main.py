@@ -1,8 +1,3 @@
-"""
-Battery Optimization Microservice
-FastAPI application with API-key auth, rate limiting, and request logging.
-"""
-
 import os
 import time
 import logging
@@ -13,8 +8,6 @@ from typing import Dict, List
 from fastapi import FastAPI, Depends, HTTPException, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security.api_key import APIKeyHeader
-from fastapi.responses import JSONResponse
-
 from models import OptimizeRequest, OptimizeResponse, VisualizeResponse
 from optimizer import run_optimization, build_visualize_data
 
@@ -41,8 +34,6 @@ app = FastAPI(
         "to minimise electricity costs while respecting physical constraints."
     ),
     version="1.0.0",
-    contact={"name": "Dunsky Energy", "email": "api@dunsky.example.com"},
-    license_info={"name": "MIT"},
 )
 
 app.add_middleware(
@@ -102,9 +93,8 @@ async def log_requests(request: Request, call_next):
     return response
 
 
-@app.get("/health", tags=["Meta"], summary="Service health check")
+@app.get("/health", tags=["Meta"])
 def health():
-    """Returns service status and version."""
     return {"status": "ok", "version": "1.0.0", "service": "battery-optimization-api"}
 
 
@@ -112,19 +102,11 @@ def health():
     "/optimize",
     response_model=OptimizeResponse,
     tags=["Optimization"],
-    summary="Compute 24-hour battery dispatch schedule",
 )
 def optimize(
     body: OptimizeRequest,
     _key: str = Depends(rate_limit),
 ):
-    """
-    Solves a Mixed-Integer Linear Program to minimise electricity cost over
-    24 one-hour intervals, subject to battery physical constraints.
-
-    Returns the optimal charge/discharge schedule, SoC trajectory, cost
-    comparison, and a plain-language explanation of the top-saving hours.
-    """
     logger.info(
         "optimize | battery capacity=%.1f kWh, efficiency=%.2f",
         body.battery.capacity_kwh,
@@ -157,16 +139,11 @@ def optimize(
     "/visualize",
     response_model=VisualizeResponse,
     tags=["Visualization"],
-    summary="Return Plotly-ready chart data for the optimised schedule",
 )
 def visualize(
     body: OptimizeRequest,
     _key: str = Depends(rate_limit),
 ):
-    """
-    Runs the same optimisation as `/optimize` then formats the results as
-    Plotly-compatible trace objects plus a summary section.
-    """
     logger.info("visualize | battery capacity=%.1f kWh", body.battery.capacity_kwh)
     try:
         result = run_optimization(

@@ -1,23 +1,3 @@
-"""
-Battery dispatch optimizer using Mixed-Integer Linear Programming (MILP).
-
-Formulation
------------
-Minimize:  Σ_t  price[t] * (charge[t] - discharge[t])
-           (we minimise the net cost delta; base load cost is constant)
-
-Subject to:
-  ∀t ∈ {0..23}:
-    0 ≤ charge[t]    ≤ max_charge_kw  * z[t]       (binary z: 1 = charging)
-    0 ≤ discharge[t] ≤ max_discharge_kw * (1 - z[t]) (mutually exclusive)
-    soc[t] = initial_soc + Σ_{s≤t} (charge[s]*η - discharge[s])
-    0 ≤ soc[t] ≤ capacity_kwh
-
-Efficiency model: energy stored = charge_kw * η  (one-way charging loss).
-Discharging is assumed loss-free on the way out, matching a common
-convention where η represents the charge efficiency factor.
-"""
-
 import pulp
 from typing import List, Dict
 
@@ -101,7 +81,6 @@ def _build_explanation(
     charge_kw: List[float],
     discharge_kw: List[float],
 ) -> str:
-    """Return a plain-language summary of the top-3 savings hours."""
     hourly_savings = [
         (price_per_kwh[t] * (discharge_kw[t] - charge_kw[t]), t)
         for t in range(24)
